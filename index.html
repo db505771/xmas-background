@@ -3,47 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Snowy Background</title>
+<title>Dark Snowy Background</title>
 <style>
-/* sky colors: change these three to make the sky deeper or paler */
 :root {
-  --sky-top: #7db8e8;
-  --sky-mid: #b7dbf5;
-  --sky-bottom: #dcedf9;
+  --sky-top: #071321;
+  --sky-mid: #10283f;
+  --sky-bottom: #1b3852;
 }
 html, body {
   margin: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 55%,
+    var(--sky-bottom) 100%
+  );
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-
-/* soft overcast light from above */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.38), rgba(255,255,255,0) 70%);
+  background: radial-gradient(
+    120% 55% at 50% -8%,
+    rgba(120,170,210,.12),
+    rgba(0,0,0,0) 70%
+  );
   pointer-events: none;
 }
-
-/* slow drifting clouds */
 .cloud {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(closest-side, rgba(255,255,255,.5), rgba(255,255,255,0));
+  background: radial-gradient(
+    closest-side,
+    rgba(150,190,220,.12),
+    rgba(150,190,220,0)
+  );
   animation: drift 70s ease-in-out infinite alternate;
 }
-.c1 { width: 90vw;  height: 30vh; left: -20vw;  top: 4vh; }
+.c1 { width: 90vw; height: 30vh; left: -20vw; top: 4vh; }
 .c2 { width: 110vw; height: 34vh; right: -40vw; top: 24vh; animation-duration: 95s; animation-delay: -30s; }
-.c3 { width: 80vw;  height: 26vh; left: 5vw;    top: 50vh; animation-duration: 80s; animation-delay: -50s; opacity: .7; }
-@keyframes drift { to { transform: translateX(18vw); } }
-
+.c3 { width: 80vw; height: 26vh; left: 5vw; top: 50vh; animation-duration: 80s; animation-delay: -50s; opacity: .7; }
+@keyframes drift {
+  to { transform: translateX(18vw); }
+}
 canvas {
   position: fixed;
   inset: 0;
@@ -52,102 +61,141 @@ canvas {
   display: block;
   pointer-events: none;
 }
-@media (prefers-reduced-motion: reduce) { .cloud { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .cloud { animation: none; }
+}
 </style>
 </head>
 <body>
-<div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
-<canvas id="g"></canvas>
-<canvas id="s"></canvas>
-
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
 <script>
 (function () {
   var cv = document.getElementById('s'), cx = cv.getContext('2d');
   var gv = document.getElementById('g'), gx = gv.getContext('2d');
   var W = 0, H = 0, dpr = 1, flakes = [], amount = 1, raf = 0, last = 0, t = 0;
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   function sprite(soft) {
-    var c = document.createElement('canvas'); c.width = c.height = 64;
-    var g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    var c = document.createElement('canvas');
+    c.width = c.height = 64;
+    var g = c.getContext('2d');
+    var gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
     if (soft) {
-      gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(.35, 'rgba(255,255,255,.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      gr.addColorStop(0, 'rgba(255,255,255,.9)');
+      gr.addColorStop(.35, 'rgba(255,255,255,.45)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
     } else {
-      gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.55, 'rgba(255,255,255,.95)');
-      gr.addColorStop(.8, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      gr.addColorStop(0, 'rgba(255,255,255,1)');
+      gr.addColorStop(.55, 'rgba(255,255,255,.95)');
+      gr.addColorStop(.8, 'rgba(255,255,255,.35)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
     }
-    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 64, 64);
     return c;
   }
   var SP = [sprite(false), sprite(true)];
-
-  /* three depths: far (small, slow), middle, near (big, soft, fast) */
   var LAYERS = [
-    { d: [3, 5],   v: [18, 32], a: [.5, .75],  sw: [6, 12],  wind: .6, soft: 0, share: .45 },
-    { d: [5, 8],   v: [34, 56], a: [.65, .9],  sw: [10, 18], wind: 1,  soft: 0, share: .33 },
+    { d: [3, 5], v: [18, 32], a: [.5, .75], sw: [6, 12], wind: .6, soft: 0, share: .45 },
+    { d: [5, 8], v: [34, 56], a: [.65, .9], sw: [10, 18], wind: 1, soft: 0, share: .33 },
     { d: [12, 22], v: [60, 95], a: [.45, .75], sw: [16, 28], wind: 1.5, soft: 1, share: .22 }
   ];
-  function rnd(a, b) { return a + Math.random() * (b - a); }
-
+  function rnd(a, b) {
+    return a + Math.random() * (b - a);
+  }
   function make(L, anywhere) {
-    return { L: L, bx: rnd(0, W), y: anywhere ? rnd(-20, H) : rnd(-40, -5), d: rnd(L.d[0], L.d[1]),
-             vy: rnd(L.v[0], L.v[1]), a: rnd(L.a[0], L.a[1]), amp: rnd(L.sw[0], L.sw[1]),
-             fr: rnd(.5, 1.4), ph: rnd(0, 6.28) };
+    return {
+      L: L,
+      bx: rnd(0, W),
+      y: anywhere ? rnd(-20, H) : rnd(-40, -5),
+      d: rnd(L.d[0], L.d[1]),
+      vy: rnd(L.v[0], L.v[1]),
+      a: rnd(L.a[0], L.a[1]),
+      amp: rnd(L.sw[0], L.sw[1]),
+      fr: rnd(.5, 1.4),
+      ph: rnd(0, 6.28)
+    };
   }
   function init() {
     var total = Math.max(50, Math.min(220, Math.round(W * H / 5200 * amount)));
     flakes = [];
     LAYERS.forEach(function (L) {
-      for (var i = Math.round(total * L.share); i > 0; i--) flakes.push(make(L, true));
+      for (var i = Math.round(total * L.share); i > 0; i--) {
+        flakes.push(make(L, true));
+      }
     });
   }
-
-  /* low rolling snow hills at the bottom: always the same shape, drawn once per size */
   function ground() {
-    gv.width = Math.round(W * dpr); gv.height = Math.round(H * dpr);
+    gv.width = Math.round(W * dpr);
+    gv.height = Math.round(H * dpr);
     gx.setTransform(dpr, 0, 0, dpr, 0, 0);
     gx.clearRect(0, 0, W, H);
     var hills = [
-      { base: .925, a1: 7, l1: 120, p1: 1.2, a2: 3, l2: 47, p2: 4.0, top: '#cfe3f3', bot: '#dcebf7' },
-      { base: .952, a1: 6, l1: 95,  p1: 3.1, a2: 3, l2: 38, p2: 0.7, top: '#e4f0fa', bot: '#eef6fc' },
-      { base: .978, a1: 4, l1: 140, p1: 5.2, a2: 2, l2: 52, p2: 2.3, top: '#f8fbff', bot: '#ffffff' }
+      {
+        base: .925, a1: 7, l1: 120, p1: 1.2,
+        a2: 3, l2: 47, p2: 4.0,
+        top: '#263d52', bot: '#344c61'
+      },
+      {
+        base: .952, a1: 6, l1: 95, p1: 3.1,
+        a2: 3, l2: 38, p2: 0.7,
+        top: '#3c5368', bot: '#4a6074'
+      },
+      {
+        base: .978, a1: 4, l1: 140, p1: 5.2,
+        a2: 2, l2: 52, p2: 2.3,
+        top: '#64798c', bot: '#8293a3'
+      }
     ];
     hills.forEach(function (h) {
       var y0 = H * h.base, x, y;
-      gx.beginPath(); gx.moveTo(0, H);
+      gx.beginPath();
+      gx.moveTo(0, H);
       for (x = 0; x <= W + 6; x += 6) {
-        y = y0 + Math.sin(x / h.l1 + h.p1) * h.a1 + Math.sin(x / h.l2 + h.p2) * h.a2;
+        y = y0 +
+          Math.sin(x / h.l1 + h.p1) * h.a1 +
+          Math.sin(x / h.l2 + h.p2) * h.a2;
         gx.lineTo(x, y);
       }
-      gx.lineTo(W, H); gx.closePath();
+      gx.lineTo(W, H);
+      gx.closePath();
       var gr = gx.createLinearGradient(0, y0 - h.a1, 0, H);
-      gr.addColorStop(0, h.top); gr.addColorStop(1, h.bot);
-      gx.fillStyle = gr; gx.fill();
+      gr.addColorStop(0, h.top);
+      gr.addColorStop(1, h.bot);
+      gx.fillStyle = gr;
+      gx.fill();
     });
   }
-
   function size() {
-    W = window.innerWidth; H = window.innerHeight;
+    W = window.innerWidth;
+    H = window.innerHeight;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ground(); init(); draw();
+    ground();
+    init();
+    draw();
   }
-
   function step(dt) {
-    var wind = 8 + 6 * Math.sin(t * .3), i, f;
-    for (i = 0; i < flakes.length; i++) {
-      f = flakes[i];
+    var wind = 8 + 6 * Math.sin(t * .3);
+    for (var i = 0; i < flakes.length; i++) {
+      var f = flakes[i];
       f.y += f.vy * dt;
       f.bx += wind * f.L.wind * dt;
       if (f.bx > W + 30) f.bx -= W + 60;
-      if (f.y > H + f.d) { f.y = -f.d; f.bx = rnd(0, W); }
+      if (f.y > H + f.d) {
+        f.y = -f.d;
+        f.bx = rnd(0, W);
+      }
     }
   }
   function draw() {
     cx.clearRect(0, 0, W, H);
     for (var i = 0; i < flakes.length; i++) {
-      var f = flakes[i], x = f.bx + Math.sin(t * f.fr + f.ph) * f.amp;
+      var f = flakes[i];
+      var x = f.bx + Math.sin(t * f.fr + f.ph) * f.amp;
       cx.globalAlpha = f.a;
       cx.drawImage(SP[f.L.soft], x - f.d / 2, f.y - f.d / 2, f.d, f.d);
     }
@@ -155,18 +203,33 @@ canvas {
   }
   function frame(ts) {
     if (!last) last = ts;
-    var dt = Math.min(.05, (ts - last) / 1000); last = ts; t += dt;
-    step(dt); draw();
+    var dt = Math.min(.05, (ts - last) / 1000);
+    last = ts;
+    t += dt;
+    step(dt);
+    draw();
     raf = requestAnimationFrame(frame);
   }
-  function start() { if (!raf && !reduce) { last = 0; raf = requestAnimationFrame(frame); } }
-  function stop() { if (raf) { cancelAnimationFrame(raf); raf = 0; } }
-
-  document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+  function start() {
+    if (!raf && !reduce) {
+      last = 0;
+      raf = requestAnimationFrame(frame);
+    }
+  }
+  function stop() {
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  }
+  document.addEventListener('visibilitychange', function () {
+    document.hidden ? stop() : start();
+  });
   window.addEventListener('resize', size);
-  /* from native: setSnowAmount(0.5) for lighter snow, 2 for a blizzard */
-  window.setSnowAmount = function (m) { amount = m > 0 ? m : 1; init(); };
-
+  window.setSnowAmount = function (m) {
+    amount = m > 0 ? m : 1;
+    init();
+  };
   size();
   start();
 })();
