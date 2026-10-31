@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Snowy Background</title>
 <style>
-/* sky colors: updated to a deep twilight palette */
+/* sky colors: balanced dusk/twilight palette */
 :root {
-  --sky-top: #0d1b2a;
-  --sky-mid: #1b263b;
-  --sky-bottom: #415a77;
+  --sky-top: #2c4257;
+  --sky-mid: #4a6886;
+  --sky-bottom: #7b9cb8;
 }
 html, body {
   margin: 0;
@@ -27,7 +27,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.15), rgba(255,255,255,0) 70%);
+  background: radial-gradient(120% 55% at 50% -8%, rgba(255,255,255,.25), rgba(255,255,255,0) 70%);
   pointer-events: none;
 }
 
@@ -36,7 +36,7 @@ body::before {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(closest-side, rgba(255,255,255,.15), rgba(255,255,255,0));
+  background: radial-gradient(closest-side, rgba(255,255,255,.25), rgba(255,255,255,0));
   animation: drift 70s ease-in-out infinite alternate;
 }
 .c1 { width: 90vw;  height: 30vh; left: -20vw;  top: 4vh; }
@@ -102,15 +102,15 @@ canvas {
     });
   }
 
-  /* low rolling snow hills at the bottom: darker slate-blue gradients for nighttime */
+  /* low rolling snow hills at the bottom: steel-blue gradients for dusk */
   function ground() {
     gv.width = Math.round(W * dpr); gv.height = Math.round(H * dpr);
     gx.setTransform(dpr, 0, 0, dpr, 0, 0);
     gx.clearRect(0, 0, W, H);
     var hills = [
-      { base: .925, a1: 7, l1: 120, p1: 1.2, a2: 3, l2: 47, p2: 4.0, top: '#2b3a4e', bot: '#1d2736' },
-      { base: .952, a1: 6, l1: 95,  p1: 3.1, a2: 3, l2: 38, p2: 0.7, top: '#3a4d65', bot: '#283648' },
-      { base: .978, a1: 4, l1: 140, p1: 5.2, a2: 2, l2: 52, p2: 2.3, top: '#506785', bot: '#3d516b' }
+      { base: .925, a1: 7, l1: 120, p1: 1.2, a2: 3, l2: 47, p2: 4.0, top: '#5b7694', bot: '#415974' },
+      { base: .952, a1: 6, l1: 95,  p1: 3.1, a2: 3, l2: 38, p2: 0.7, top: '#7593b4', bot: '#577598' },
+      { base: .978, a1: 4, l1: 140, p1: 5.2, a2: 2, l2: 52, p2: 2.3, top: '#9bb8d7', bot: '#7697bb' }
     ];
     hills.forEach(function (h) {
       var y0 = H * h.base, x, y;
